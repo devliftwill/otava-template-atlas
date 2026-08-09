@@ -1,0 +1,240 @@
+---
+// Atlas — a one-page site for a service business.
+//
+// Every word on this page comes from src/data/site.json. That is deliberate:
+// Otava's chat agent edits this repo in plain language, and "change the hero
+// headline" should be one obvious edit to one obvious file, not a hunt through
+// markup. Add structure here; keep copy there.
+import site from "../data/site.json";
+import "../styles/global.css";
+
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import Services from "../components/Services.astro";
+import Clients from "../components/Clients.astro";
+import Proof from "../components/Proof.astro";
+import About from "../components/About.astro";
+import Contact from "../components/Contact.astro";
+import Footer from "../components/Footer.astro";
+
+// The language is data, not a constant. It sets <html lang> for assistive
+// technology, formats the proof figures, and is read back off <html> by the
+// count-up script so the animated frames group digits the same way the
+// published ones do.
+const lang = site.locale;
+// Keep the doctype and <html> adjacent below. Anything between them — even a
+// comment — makes the compiler emit the page without <html> or <body> at all.
+// It still looks right in a browser, which is what makes it worth a note: what
+// is actually lost is the document language, and with it the reveal machinery's
+// hold on <html>.
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{site.brand} — {site.tagline}</title>
+    <meta name="description" content={site.tagline} />
+    <meta property="og:title" content={`${site.brand} — ${site.tagline}`} />
+    <meta property="og:description" content={site.hero.body} />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#1f3a5f" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <Header brand={site.brand} nav={site.nav} cta={site.cta} navLabel={site.labels.nav} />
+    <main>
+      <Hero hero={site.hero} />
+      <Services services={site.services} />
+      <Clients
+        clients={site.clients}
+        motion={{ pause: site.labels.pauseMotion, resume: site.labels.resumeMotion }}
+      />
+      <Proof proof={site.proof} locale={site.locale} />
+      <About about={site.about} />
+      <Contact contact={site.contact} />
+    </main>
+    <Footer
+      brand={site.brand}
+      note={site.footer.note}
+      legal={site.footer.legal}
+      contact={site.contact}
+      toTopLabel={site.labels.toTop}
+    />
+
+    <script>
+      // Motion, added by script so the page is never dependent on it.
+      //
+      // `is-ready` arms the hidden state and is only set while the document is
+      // visible. IntersectionObserver callbacks do not fire in a hidden tab, so
+      // arming there would leave the page permanently blank — which is exactly
+      // what a thumbnail capture or a preview iframe would photograph. This is
+      // the single most important behaviour in the file: everything else is
+      // decoration, and this is what stops the decoration from eating the page.
+      const root = document.documentElement;
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      /** Show everything, now, and stop hiding anything in future. */
+      const revealAll = () => {
+        root.classList.remove("is-ready");
+        document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-in"));
+      };
+
+      if (!reduced && "IntersectionObserver" in window && document.visibilityState === "visible") {
+        // Arm only once a real animation frame has happened.
+        //
+        // This is the load-bearing inversion: DEFAULT TO VISIBLE, and opt into
+        // hiding only after the browser proves it is actually drawing. A
+        // screenshotter reports itself visible but never composites, so it
+        // never fires requestAnimationFrame — and it also turned out not to
+        // fire setTimeout, resize, or IntersectionObserver. Anything that
+        // hides content first and relies on one of those to give it back is
+        // betting on a callback that never comes, and loses: Vermillion's
+        // lower two-thirds photographed as an empty red field.
+        //
+        // In a real browser this lands within one frame, so nothing changes.
+        // Mark what is on screen, THEN switch hiding on — in one frame, in this
+        // order. Never the other way round.
+        //
+        // A screenshotter sets a viewport tall enough to hold the whole page, so
+        // every element is 'on screen' and every element gets marked, and arming
+        // then hides nothing: the capture is the complete page. A real visitor has
+        // a normal viewport, so only the hero is marked and the rest still reveals
+        // on scroll.
+        //
+        // Doing it in the other order, or in two separate frames, is what left
+        // Vermillion's lower two-thirds as an empty red field. Recovering later
+        // does not work either: a screenshotter fires no resize, no
+        // IntersectionObserver, and — measured — not even setTimeout.
+        requestAnimationFrame(() => {
+          for (const el of document.querySelectorAll('.reveal')) {
+            if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('is-in');
+          }
+          root.classList.add("is-ready");
+        });
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (!e.isIntersecting) continue;
+              e.target.classList.add("is-in");
+              io.unobserve(e.target);
+            }
+          },
+          { rootMargin: "0px 0px -8% 0px", threshold: 0.05 },
+        );
+        document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+        requestAnimationFrame(() => {
+          document.querySelectorAll(".reveal").forEach((el) => {
+            if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add("is-in");
+          });
+        });
+        document.addEventListener("visibilitychange", () => { if (document.hidden) revealAll(); });
+        window.addEventListener("pagehide", revealAll);
+
+        // Failsafe. The visibility check covers the case we know about — a tab
+        // that starts hidden — but IntersectionObserver can also go quiet for
+        // reasons a page cannot see from the inside: an ancestor iframe that is
+        // display:none in the parent document, a `content-visibility` container,
+        // a renderer that reports "visible" and never composites. In all of
+        // those the page is complete, correct, and photographs as blank.
+        //
+        // So: if not one element has been revealed a second and a half after
+        // load, the observer is not doing its job and the hidden state gives
+        // itself up. This cannot misfire in normal use — the rAF pass above
+        // reveals everything above the fold before the first frame, so on any
+        // page that is actually being rendered the count is never zero.
+        window.setTimeout(() => {
+          if (!document.querySelector(".reveal.is-in")) revealAll();
+        }, 1500);
+      }
+
+      // Count-up on the proof figures. The rendered text is the source of truth
+      // for the final frame, so a value the formatter would round is restored
+      // exactly as published.
+      if (!reduced && "IntersectionObserver" in window) {
+        // Grouping follows the document language, which comes from
+        // src/data/site.json — so a site set to "de" counts up through 1.200
+        // rather than 1,200.
+        const locale = root.lang || undefined;
+        const fmt = (n) => Math.round(n).toLocaleString(locale);
+        const io2 = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (!e.isIntersecting) continue;
+              const el = e.target;
+              const slot = el.querySelector("[data-count-value]");
+              const target = Number(el.dataset.count || 0);
+              io2.unobserve(el);
+              if (!slot || !target) continue;
+              const settled = slot.textContent ?? fmt(target);
+              const t0 = performance.now();
+              const run = (now) => {
+                const t = Math.min(1, (now - t0) / 1100);
+                slot.textContent = t < 1 ? fmt(target * (1 - Math.pow(1 - t, 3))) : settled;
+                if (t < 1) requestAnimationFrame(run);
+              };
+              requestAnimationFrame(run);
+            }
+          },
+          { threshold: 0.4 },
+        );
+        document.querySelectorAll("[data-count]").forEach((el) => io2.observe(el));
+      }
+
+      // The header condenses once the hero is behind you, and carries a hairline
+      // showing how far down the page you are.
+      //
+      // This runs regardless of prefers-reduced-motion: it is a state
+      // indicator, not decoration, and the stylesheet collapses its transitions
+      // to nothing under that setting so it simply snaps between states. One
+      // rAF-throttled read of scrollY, and the work per frame is two writes.
+      const hdr = document.querySelector("[data-hdr]");
+      const bar = document.querySelector("[data-progress]");
+      if (hdr || bar) {
+        let queued = false;
+        const measure = () => {
+          queued = false;
+          const y = window.scrollY || window.pageYOffset || 0;
+          if (hdr) hdr.classList.toggle("is-condensed", y > 48);
+          if (bar) {
+            const max = document.documentElement.scrollHeight - window.innerHeight;
+            bar.style.setProperty("--p", max > 0 ? String(Math.min(1, Math.max(0, y / max))) : "0");
+          }
+        };
+        const onScroll = () => {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(measure);
+        };
+        measure();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("resize", onScroll, { passive: true });
+      }
+
+      // The stop control for the two things that move on their own — the client
+      // marquee and the wash behind the proof quote. WCAG 2.2.2 wants a way to
+      // stop anything that starts by itself and runs past five seconds, and
+      // "hover to pause" is not one: there is no hover on a phone and no way to
+      // reach it from a keyboard.
+      //
+      // It ships hidden and is revealed here, so a visitor without JavaScript —
+      // for whom the CSS animation is running and unstoppable — is not offered
+      // a button that does nothing. Under prefers-reduced-motion nothing is
+      // moving, so it stays hidden.
+      const motionBtn = document.querySelector("[data-motion-toggle]");
+      if (motionBtn && !reduced) {
+        motionBtn.hidden = false;
+        motionBtn.addEventListener("click", () => {
+          const paused = root.classList.toggle("motion-paused");
+          // The button's name is its state. No aria-pressed as well: that would
+          // announce "Resume motion, pressed", which reads as the opposite of
+          // what is true.
+          motionBtn.textContent = paused
+            ? motionBtn.dataset.labelResume
+            : motionBtn.dataset.labelPause;
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,97 @@
+---
+import Words from "./Words.astro";
+
+interface Props {
+  services: { title: string; items: { name: string; body: string }[] };
+}
+const { services } = Astro.props;
+---
+
+<section class="section section--tint" id="services">
+  <div class="wrap">
+    <span class="rule reveal reveal--rule" aria-hidden="true"></span>
+    <h2 class="svc__title"><Words text={services.title} start={0.06} /></h2>
+    <div class="svc">
+      {
+        services.items.map((item, i) => {
+          // Each item's parts arrive in reading order — rule, numeral, name,
+          // then the paragraph — and each item starts a beat after the last.
+          const base = i * 0.11;
+          return (
+            <article class="svc__item">
+              <span class="svc__rule reveal reveal--rule" aria-hidden="true" style={`--rd:${base.toFixed(2)}s`} />
+              <span class="svc__num reveal" style={`--rd:${(base + 0.08).toFixed(2)}s`}>
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 class="reveal" style={`--rd:${(base + 0.14).toFixed(2)}s`}>{item.name}</h3>
+              <p class="reveal" style={`--rd:${(base + 0.2).toFixed(2)}s`}>{item.body}</p>
+            </article>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .svc__title {
+    margin-top: 20px;
+  }
+  .svc {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 40px 44px;
+    margin-top: 48px;
+  }
+
+  .svc__item {
+    /* The lift lives on the article, and nothing on the article is a reveal —
+       otherwise the hover would inherit the reveal's three-quarter-second
+       transition and feel broken. */
+    transition: transform 0.35s var(--ease);
+  }
+  .svc__item:hover {
+    transform: translateY(-4px);
+  }
+
+  .svc__rule {
+    display: block;
+    height: 2px;
+    background: var(--line-2);
+    transform-origin: left center;
+    /* This element needs a hover transition AND the reveal's. They have to be
+       one declaration: a `transition` shorthand here outranks the one on
+       `.reveal--rule` (scoped selectors carry an extra attribute) and would
+       silently drop it. The delay list maps to the property list in order — the
+       reveal is staggered, the hover colour is not. */
+    transition: opacity 0.3s linear, transform 0.85s var(--ease), background-color 0.3s ease;
+    transition-delay: var(--rd, 0s), var(--rd, 0s), 0s;
+  }
+  .svc__item:hover .svc__rule {
+    background: var(--accent-fill);
+  }
+
+  .svc__num {
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--accent);
+    display: block;
+    padding-top: 12px;
+    letter-spacing: 0.04em;
+  }
+  .svc__item h3 {
+    margin-block: 14px 10px;
+    /* Same trap as .svc__rule: the heading is a .reveal, so its own transition
+       has to carry opacity and transform too or it would snap into place. */
+    transition: opacity var(--reveal-dur) var(--ease), transform var(--reveal-dur) var(--ease),
+      color 0.28s ease;
+    transition-delay: var(--rd, 0s), var(--rd, 0s), 0s;
+  }
+  .svc__item:hover h3 {
+    color: var(--accent);
+  }
+  .svc__item p {
+    color: var(--ink-2);
+    font-size: 16px;
+  }
+</style>

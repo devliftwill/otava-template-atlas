@@ -1,0 +1,71 @@
+---
+import Words from "./Words.astro";
+
+interface Props {
+  hero: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    primary: { label: string; href: string };
+    secondary: { label: string; href: string };
+  };
+}
+const { hero } = Astro.props;
+---
+
+{/*
+  The one loud moment on the page, and it is loud only by this site's standards:
+  a rule draws, the eyebrow arrives, the headline comes up a word at a time,
+  then the lede, then the two buttons. Each step is a `--rd` delay on an element
+  that is already revealing — no timers, no sequencing code, and if the reveal
+  system is disarmed (hidden tab, no JS, reduced motion) the whole thing is
+  simply the finished hero.
+*/}
+<section class="hero" id="top">
+  <div class="wrap">
+    <span class="rule hero__rule reveal reveal--rule" aria-hidden="true"></span>
+    <p class="eyebrow hero__eyebrow reveal" style="--rd:0.08s">{hero.eyebrow}</p>
+    <h1 class="hero__title">
+      <Words text={hero.title} start={0.24} step={0.055} cap={0.66} />
+    </h1>
+    <p class="lede hero__body reveal" style="--rd:1.02s">{hero.body}</p>
+    <div class="hero__actions">
+      <span class="reveal" style="--rd:1.16s">
+        <a class="btn btn--primary" href={hero.primary.href}>
+          {hero.primary.label}
+          <svg class="btn__arrow" width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true">
+            <path d="M1 5h11M8.5 1.5 12 5l-3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </span>
+      <span class="reveal" style="--rd:1.26s">
+        <a class="btn btn--ghost" href={hero.secondary.href}>{hero.secondary.label}</a>
+      </span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: clamp(56px, 11vw, 132px) var(--section);
+  }
+  .hero__rule {
+    margin-bottom: 22px;
+  }
+  .hero__title {
+    margin-block: 18px 24px;
+    max-width: 16ch;
+  }
+  .hero__body {
+    max-width: 54ch;
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 36px;
+  }
+  .hero__actions > span {
+    display: inline-flex;
+  }
+</style>

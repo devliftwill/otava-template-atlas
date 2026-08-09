@@ -1,0 +1,91 @@
+---
+import Words from "./Words.astro";
+
+interface Props {
+  about: { title: string; body: string; points: string[] };
+}
+const { about } = Astro.props;
+---
+
+<section class="section section--tint" id="about">
+  <div class="wrap about">
+    <div>
+      <span class="rule reveal reveal--rule" aria-hidden="true"></span>
+      <h2 class="about__title"><Words text={about.title} start={0.06} /></h2>
+      <p class="lede about__body reveal" style="--rd:0.28s">{about.body}</p>
+    </div>
+
+    {/*
+      The list ticks in one line at a time: the dash draws itself, then the
+      line it belongs to arrives. The dash is a real element rather than a
+      ::before so it can be revealed on its own schedule.
+    */}
+    <ul class="about__points">
+      {
+        about.points.map((p, i) => {
+          const base = 0.16 + i * 0.13;
+          return (
+            <li>
+              <span class="about__tick reveal reveal--rule" aria-hidden="true" style={`--rd:${base.toFixed(2)}s`} />
+              <span class="about__text reveal" style={`--rd:${(base + 0.06).toFixed(2)}s`}>{p}</span>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: clamp(40px, 7vw, 88px);
+    align-items: start;
+  }
+  .about__title {
+    margin-top: 20px;
+  }
+  .about__body {
+    margin-top: 22px;
+  }
+
+  .about__points {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 14px;
+  }
+  .about__points li {
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    align-items: start;
+    font-size: 16px;
+    color: var(--ink-2);
+    transition: color 0.28s ease;
+  }
+  .about__points li:hover {
+    color: var(--ink);
+  }
+  .about__tick {
+    display: block;
+    width: 12px;
+    height: 2px;
+    margin-top: 0.62em;
+    background: var(--accent-fill);
+    transform-origin: left center;
+    /* Hover and reveal transitions in one declaration — see Services.astro. */
+    transition: opacity 0.3s linear, transform 0.7s var(--ease), width 0.3s var(--ease);
+    transition-delay: var(--rd, 0s), var(--rd, 0s), 0s;
+  }
+  .about__points li:hover .about__tick {
+    width: 20px;
+  }
+
+  @media (max-width: 820px) {
+    .about {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

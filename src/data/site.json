@@ -1,0 +1,122 @@
+{
+  "brand": "Atlas",
+  "tagline": "Operations consulting for companies that outgrew their spreadsheets",
+  "locale": "en",
+  "labels": {
+    "nav": "Main",
+    "toTop": "Back to top",
+    "pauseMotion": "Pause motion",
+    "resumeMotion": "Resume motion"
+  },
+  "nav": [
+    {
+      "label": "What we do",
+      "href": "#services"
+    },
+    {
+      "label": "Results",
+      "href": "#proof"
+    },
+    {
+      "label": "About",
+      "href": "#about"
+    }
+  ],
+  "cta": {
+    "label": "Book a call",
+    "href": "#contact"
+  },
+  "hero": {
+    "eyebrow": "Independent since 2016",
+    "title": "The bottleneck isn't your team. It's the handoffs.",
+    "body": "We come in for twelve weeks, map how work actually moves through your business, and leave you with a process your people will use on a bad Monday.",
+    "primary": {
+      "label": "Book a call",
+      "href": "#contact"
+    },
+    "secondary": {
+      "label": "See what that looks like",
+      "href": "#services"
+    }
+  },
+  "services": {
+    "title": "Three ways we're usually brought in",
+    "items": [
+      {
+        "name": "Operations audit",
+        "body": "Four weeks. We follow a real order end to end, interview the people who touch it, and hand back a map of where it stalls — with the three fixes worth doing first."
+      },
+      {
+        "name": "Systems implementation",
+        "body": "You know which tool you need. We scope it, migrate the data nobody wants to touch, train the team, and stay on until it's the way work gets done rather than a second place to log it."
+      },
+      {
+        "name": "Fractional COO",
+        "body": "Two days a week, on your leadership team. For the stretch between the founder running operations personally and being able to hire someone full-time to."
+      }
+    ]
+  },
+  "clients": {
+    "title": "Clients, past and present",
+    "items": [
+      "Fenwick Logistics",
+      "Northbank Foods",
+      "Verity Health Group",
+      "Calder & Sons",
+      "Marlowe Instruments",
+      "Ridgeway Freight",
+      "Ashby Print Co.",
+      "Halden Renewables",
+      "Trent Valley Dairy",
+      "Peverell Chambers"
+    ]
+  },
+  "proof": {
+    "quote": "They found nine days of dead time in a fourteen-day process, and were straight about the fact that six of them were our own fault. The other three we fixed in a fortnight.",
+    "name": "Priya Raman",
+    "role": "Managing Director, Fenwick Logistics",
+    "stats": [
+      {
+        "value": 40,
+        "suffix": "+",
+        "label": "engagements delivered"
+      },
+      {
+        "value": 12,
+        "suffix": " wks",
+        "label": "typical engagement"
+      },
+      {
+        "value": 9,
+        "suffix": " yrs",
+        "label": "doing only this"
+      }
+    ]
+  },
+  "about": {
+    "title": "Small on purpose",
+    "body": "Atlas is four people. That means the person who scoped your engagement is the person doing the work, and there is no layer of account management between you and an answer. It also means we take on eight clients a year, so we say no more than we say yes.",
+    "points": [
+      "Fixed price, agreed before we start",
+      "A named lead on every engagement",
+      "Everything we build is yours, documented"
+    ]
+  },
+  "contact": {
+    "title": "Tell us what's stuck",
+    "body": "A short note is plenty. We'll reply within a working day, and if we're not the right people we'll usually know someone who is.",
+    "email": "hello@atlas.example",
+    "phone": "+44 20 7946 0142",
+    "address": "26 Bastwick Street, London EC1V 3PE",
+    "form": {
+      "name": "Your name",
+      "email": "Email",
+      "message": "What's stuck?",
+      "submit": "Send it over"
+    }
+  },
+  "footer": {
+    "note": "Atlas Operations Ltd · Registered in England 09482210",
+    "legal": "© {year} Atlas Operations Ltd"
+  }
+}

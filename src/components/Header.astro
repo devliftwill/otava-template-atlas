@@ -1,0 +1,144 @@
+---
+interface Props {
+  brand: string;
+  nav: { label: string; href: string }[];
+  cta: { label: string; href: string };
+  navLabel: string;
+}
+const { brand, nav, cta, navLabel } = Astro.props;
+---
+
+{/*
+  The header condenses once the hero is behind you: it loses 12px of height,
+  its hairline firms up and the paper behind it goes nearly opaque. It is one
+  class toggle driven by scroll position (see index.astro) — everything else is
+  this stylesheet reacting to it, so there is no per-frame layout work.
+*/}
+<header class="hdr" data-hdr>
+  <div class="wrap hdr__inner">
+    <a class="hdr__brand" href="#top">{brand}</a>
+    <nav class="hdr__nav" aria-label={navLabel}>
+      {
+        nav.map((item) => (
+          <a href={item.href}>
+            <span>{item.label}</span>
+          </a>
+        ))
+      }
+    </nav>
+    <a class="btn btn--primary hdr__cta" href={cta.href}>{cta.label}</a>
+  </div>
+  {/* How far down the page you are. Hidden until the header condenses, so it
+      never draws attention at the top where there is nothing to report. */}
+  <span class="hdr__progress" data-progress aria-hidden="true"></span>
+</header>
+
+<style>
+  .hdr {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--paper) 82%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid transparent;
+    transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  .hdr.is-condensed {
+    background: color-mix(in srgb, var(--paper) 96%, transparent);
+    border-bottom-color: var(--line);
+    box-shadow: 0 1px 14px -10px rgba(20, 24, 31, 0.6);
+  }
+
+  .hdr__inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: var(--hdr-h);
+    transition: height 0.4s var(--ease);
+  }
+  .hdr.is-condensed .hdr__inner {
+    --hdr-h: 56px;
+  }
+
+  .hdr__brand {
+    font-family: var(--font-display);
+    font-size: 21px;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    transition: color 0.25s ease, letter-spacing 0.4s var(--ease);
+  }
+  .hdr__brand:hover {
+    color: var(--accent);
+  }
+  .hdr.is-condensed .hdr__brand {
+    letter-spacing: 0.005em;
+  }
+
+  .hdr__nav {
+    display: flex;
+    gap: 26px;
+    margin-inline-start: auto;
+  }
+  .hdr__nav a {
+    font-size: 15px;
+    color: var(--ink-2);
+    text-decoration: none;
+    transition: color 0.25s ease;
+  }
+  /* The underline grows from the left rather than appearing. */
+  .hdr__nav a span {
+    display: inline-block;
+    position: relative;
+  }
+  .hdr__nav a span::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 1px;
+    background: var(--accent-fill);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.35s var(--ease);
+  }
+  .hdr__nav a:hover {
+    color: var(--ink);
+  }
+  .hdr__nav a:hover span::after,
+  .hdr__nav a:focus-visible span::after {
+    transform: none;
+  }
+
+  .hdr__cta {
+    padding: 9px 16px;
+    font-size: 14px;
+  }
+
+  .hdr__progress {
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--accent-fill);
+    transform: scaleX(var(--p, 0));
+    transform-origin: left center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  .hdr.is-condensed .hdr__progress {
+    opacity: 1;
+  }
+
+  /* Below the fold on a phone the nav is noise — the CTA is the only thing
+     worth the width, and every link is a scroll away in the page anyway. */
+  @media (max-width: 720px) {
+    .hdr__nav {
+      display: none;
+    }
+    .hdr__cta {
+      margin-inline-start: auto;
+    }
+  }
+</style>

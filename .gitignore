@@ -1,0 +1,16 @@
+# Build output and dependencies.
+#
+# This file is not housekeeping — it is load-bearing. Otava's chat agent edits
+# this repo inside a runner workspace where `npm install` has already run, and
+# it commits with `git add -A`. Without this, every edit sweeps node_modules and
+# dist into the commit.
+node_modules/
+dist/
+.astro/
+.output/
+
+# Local env and editor noise.
+.env
+.env.production
+.DS_Store
+*.log

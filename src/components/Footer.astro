@@ -1,0 +1,111 @@
+---
+interface Props {
+  brand: string;
+  note: string;
+  /** The copyright line, from src/data/site.json. Any "{year}" in it is
+      replaced with the current year at build time, so the wording — including
+      the © itself — stays editable in the data file rather than being welded
+      into this component where nobody would think to look for it. */
+  legal: string;
+  contact: { email: string };
+  toTopLabel: string;
+}
+const { brand, note, legal, contact, toTopLabel } = Astro.props;
+const legalLine = legal.replace("{year}", String(new Date().getFullYear()));
+---
+
+<footer class="ftr">
+  <div class="wrap">
+    <span class="ftr__rule reveal reveal--rule" aria-hidden="true"></span>
+    <div class="ftr__inner">
+      <a class="ftr__brand reveal" href="#top" style="--rd:0.06s" title={toTopLabel}>{brand}</a>
+      <p class="reveal" style="--rd:0.14s">{note}</p>
+      <p class="ftr__legal">
+        <span class="reveal" style="--rd:0.22s">{legalLine}</span>
+        <a class="reveal" style="--rd:0.28s" href={`mailto:${contact.email}`}>
+          <span>{contact.email}</span>
+        </a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ftr {
+    padding-block: 0 44px;
+  }
+  .ftr__rule {
+    display: block;
+    height: 1px;
+    background: var(--line);
+    transform-origin: left center;
+    margin-bottom: 34px;
+  }
+  .ftr__inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    align-items: baseline;
+    font-size: 14px;
+    color: var(--ink-3);
+  }
+  .ftr__brand {
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--ink);
+    text-decoration: none;
+    /* The brand is a .reveal as well as a hover target, so this declaration has
+       to carry both — see Services.astro for why it cannot be two. */
+    transition: opacity var(--reveal-dur) var(--ease), transform var(--reveal-dur) var(--ease),
+      color 0.25s ease;
+    transition-delay: var(--rd, 0s), var(--rd, 0s), 0s;
+  }
+  .ftr__brand:hover {
+    color: var(--accent);
+  }
+  /* Flex with a gap rather than a "·" typed into the markup: the separator is
+     decoration, and decoration that lives in the stylesheet cannot end up as a
+     stray glyph in a screen reader or an untranslatable string in a component. */
+  .ftr__legal {
+    margin-inline-start: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+  }
+  .ftr a {
+    text-decoration: none;
+  }
+  /* --line-3: the underline is what marks this as a link. At --line (1.2:1 on
+     white) the footer's only contact route read as plain grey text. */
+  .ftr__legal a span {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px solid var(--line-3);
+    transition: color 0.25s ease, border-color 0.25s ease;
+  }
+  .ftr__legal a span::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--accent-fill);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.35s var(--ease);
+  }
+  .ftr__legal a:hover span {
+    color: var(--ink);
+  }
+  .ftr__legal a:hover span::after,
+  .ftr__legal a:focus-visible span::after {
+    transform: none;
+  }
+
+  @media (max-width: 640px) {
+    .ftr__legal {
+      margin-inline-start: 0;
+    }
+  }
+</style>

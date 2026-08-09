@@ -1,0 +1,410 @@
+/* Atlas — one stylesheet, no framework.
+   Everything a customer is likely to want changed (colour, type, spacing
+   rhythm, how fast things move) is a variable at the top, so "make it navy and
+   a bit tighter" is two edits rather than a search across components. */
+
+:root {
+  --ink: #14181f;
+  --ink-2: #4a5361;
+  /* 4.9:1 on white. Was #7b8593 at 3.74 — under AA, and it is the colour of
+     the hero eyebrow, the testimonial attribution and the footer's mailto
+     link, so the site's secondary contact route was sub-AA. */
+  --ink-3: #626c7a;
+  --paper: #ffffff;
+  --paper-2: #f6f7f9;
+
+  /* Three hairline weights, and the difference between them is a WCAG rule
+     rather than taste. --line and --line-2 are decoration (section edges, the
+     little dash before a service, the dot between client names) and only have
+     to be seen; they measure 1.2:1 and 1.5:1 on white, which is fine for that
+     job. --line-3 is for hairlines that ARE the affordance: the border that
+     tells you a box is a text field, the outline that tells you a ghost button
+     is a button, the underline that tells you an address is a link. Those are
+     user interface components and link indicators, so 1.4.11 asks 3:1 — and
+     --line-2 at 1.5:1 was being used for all three, which meant the contact
+     form's fields had no perceivable boundary at all. #848e9c is 3.32:1 on
+     --paper and 3.10:1 on --paper-2, so it clears on both the white field
+     interiors and the tinted panel they sit in. */
+  --line: #e3e6eb; /* decorative: section rules, footer hairline */
+  --line-2: #ccd3dd; /* decorative: ticks, dots, resting accents */
+  --line-3: #848e9c; /* structural: field borders, button outlines, link underlines */
+
+  /* Navy appears twice over, and the two jobs have different contrast floors:
+     as TYPE it has to clear 4.5:1, as a rule or a button fill it only has to
+     be visible. They happen to be the same value today — navy is 11.5:1 on
+     white, comfortably legible at any size — but they are separate tokens so
+     that "make the accent a bit brighter" can lighten the fills without
+     quietly dropping the figures in the proof section below AA. */
+  --accent: #1f3a5f; /* type: 11.5:1 on --paper, 11.0:1 on --paper-2 */
+  --accent-fill: #1f3a5f; /* rules, ticks, button fills */
+  --accent-deep: #16293f; /* the pressed/hovered version of a fill */
+  --accent-ink: #ffffff; /* type ON an accent fill — 11.5:1 */
+
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
+
+  --measure: 68ch;
+  --gutter: clamp(20px, 5vw, 64px);
+  --section: clamp(64px, 10vw, 128px);
+  --radius: 10px;
+
+  /* One easing for the whole site. Everything decelerates the same way, which
+     is most of what makes a set of separate animations read as one hand. */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --reveal-dur: 0.72s;
+
+  --hdr-h: 68px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* The header is sticky; without this an in-page jump lands the target
+     heading behind it. Sized for the tall (un-condensed) header, since a jump
+     from the top of the page is the case that would otherwise be wrong. */
+  scroll-padding-top: 88px;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  /* Nothing on this page is allowed to widen the document. A marquee or an
+     oversized headline is clipped by its own container; this is the backstop
+     that turns a mistake into a clipped pixel rather than a sideways scroll. */
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(34px, 6vw, 60px);
+}
+h2 {
+  font-size: clamp(26px, 4vw, 38px);
+}
+h3 {
+  font-size: 20px;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-fill);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.wrap {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: var(--section);
+}
+
+.section--tint {
+  background: var(--paper-2);
+  border-block: 1px solid var(--line);
+}
+
+.lede {
+  font-size: clamp(17px, 2vw, 20px);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+
+.eyebrow {
+  font-size: 12.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
+}
+
+/* A short hairline that sits above a heading and draws itself in. Used often
+   enough to be worth a name. */
+.rule {
+  display: block;
+  width: 44px;
+  height: 2px;
+  background: var(--accent-fill);
+  transform-origin: left center;
+}
+.rule--wide {
+  width: 100%;
+  height: 1px;
+  background: var(--line);
+}
+
+/* buttons -------------------------------------------------------------- */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 22px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.28s var(--ease), background-color 0.28s ease, border-color 0.28s ease,
+    color 0.28s ease, box-shadow 0.28s var(--ease);
+}
+.btn:hover {
+  transform: translateY(-2px);
+}
+.btn__arrow {
+  flex: none;
+  transition: transform 0.28s var(--ease);
+}
+.btn:hover .btn__arrow {
+  transform: translateX(3px);
+}
+.btn--primary {
+  background: var(--accent-fill);
+  color: var(--accent-ink);
+}
+.btn--primary:hover {
+  background: var(--accent-deep);
+  box-shadow: 0 8px 20px -12px rgba(20, 24, 31, 0.55);
+}
+.btn--ghost {
+  /* Not --line-2: the outline is the only thing that says "button", so it is a
+     user interface component boundary and needs 3:1. */
+  border-color: var(--line-3);
+  color: var(--ink);
+}
+.btn--ghost:hover {
+  border-color: var(--accent-fill);
+  background: var(--paper);
+  box-shadow: 0 8px 20px -14px rgba(20, 24, 31, 0.5);
+}
+
+/* ---- motion ---------------------------------------------------------------
+   Sections rise as they arrive. The hidden state is behind `.is-ready`, which
+   JavaScript adds and only while the page is actually being looked at — an
+   element hidden by CSS that waits for an IntersectionObserver is invisible
+   for good in a background tab, and preview iframes and thumbnail capture both
+   start there. */
+.reveal {
+  transition: opacity var(--reveal-dur) var(--ease), transform var(--reveal-dur) var(--ease);
+  /* Per-element stagger. Components set --rd inline so a list of three arrives
+     as a phrase; anything that does not set it starts immediately. */
+  transition-delay: var(--rd, 0s);
+}
+.is-ready .reveal {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.is-ready .reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* The older two-step stagger, kept so existing markup keeps working. */
+.is-ready .reveal[data-delay="1"] {
+  --rd: 0.08s;
+}
+.is-ready .reveal[data-delay="2"] {
+  --rd: 0.16s;
+}
+
+/* A hairline that draws itself left to right instead of fading. */
+.reveal--rule {
+  transition: opacity 0.3s linear, transform 0.85s var(--ease);
+  transition-delay: var(--rd, 0s);
+}
+.is-ready .reveal--rule {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.is-ready .reveal--rule.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Word-by-word headings ------------------------------------------------ */
+/* Each word is an inline-block window with the word inside it, so the type
+   rises out of the line rather than fading on the spot. The window is a hair
+   taller than the line box (0.08em, given back as negative margin) so a
+   descender is never clipped in the resting state — the cost is that a word
+   emerges from a sliver rather than from nothing, which is invisible at speed
+   and much safer than guessing a font's descent. */
+.w {
+  display: inline-block;
+  vertical-align: bottom;
+  overflow: hidden;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  padding-block-end: 0.08em;
+  margin-block-end: -0.08em;
+}
+.w__i {
+  display: inline-block;
+  /* A word longer than the column would otherwise be shrink-to-fit at its full
+     width and then silently sliced off by .w's overflow:hidden. Constrained to
+     the window it can break inside itself instead, so a headline nobody
+     foresaw loses nothing at 320px. */
+  max-width: 100%;
+  transition: opacity 0.6s var(--ease), transform 0.72s var(--ease);
+  transition-delay: var(--rd, 0s);
+}
+.is-ready .w__i {
+  opacity: 0;
+  transform: translateY(1em);
+}
+.is-ready .w__i.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Continuous motion ---------------------------------------------------- */
+/* Two things on this page never stop: the client marquee and a wash of navy
+   that drifts behind the proof section. Both are slow enough to be scenery —
+   the wash takes a minute and a half to cross, and it sits at 5% opacity, so
+   the text over it stays at 10.6:1. Neither runs under body copy that changes
+   position. */
+@keyframes atlas-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes atlas-drift {
+  from {
+    transform: translate3d(-4%, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4%, -2%, 0) scale(1.12);
+  }
+}
+
+/* Both of those start on their own, run well past five seconds and sit beside
+   (the marquee) or behind (the wash) real content — which is exactly what
+   WCAG 2.2.2 asks for a stop control for. prefers-reduced-motion covers the
+   visitor who set a system preference; it does nothing for the visitor who
+   simply finds a moving list hard to read on the day, and the marquee's
+   hover-to-pause is unreachable by keyboard and meaningless on a phone. So
+   there is a real button in the client band, and it puts `motion-paused` on
+   <html>.
+   The rules that respond to it live in Clients.astro and Proof.astro rather
+   than here, and that is deliberate: the `animation` shorthand that starts
+   each one sits in a scoped block, so it carries an extra attribute in its
+   selector. A plain `html.motion-paused .marquee__track` in this file would
+   tie on specificity, lose on order, and the shorthand would quietly reset
+   animation-play-state back to running — a button that looks like it works
+   and does nothing. Scoped, the paused rule outranks its own base rule. */
+
+/* Reduced motion --------------------------------------------------------
+   Durations AND delays go to zero. Zeroing only the duration leaves a stagger
+   in place — a 12-word headline would still arrive over half a second, one
+   word at a time, which is the exact effect the setting is asking us not to
+   produce. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal,
+  .is-ready .reveal,
+  .is-ready .reveal.is-in,
+  .w__i,
+  .is-ready .w__i {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .btn:hover,
+  .btn:hover .btn__arrow,
+  .svc__item:hover,
+  .stat:hover {
+    transform: none !important;
+  }
+  .marquee__track,
+  .proof__wash {
+    animation: none !important;
+    transform: none !important;
+  }
+  /* Nothing is moving, so a control that stops the movement is a lie. The
+     script leaves it hidden under this setting; this is the belt to that
+     brace, in case the markup is ever rendered without the script. */
+  .band__toggle {
+    display: none !important;
+  }
+}
+
+/* Printing must not inherit a half-played animation, and a sticky header
+   printed on every page is a wasted band across the paper. */
+@media print {
+  .reveal,
+  .is-ready .reveal,
+  .reveal--rule,
+  .is-ready .reveal--rule,
+  .w__i,
+  .is-ready .w__i {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  .hdr,
+  [data-hdr] {
+    position: static !important;
+    backdrop-filter: none !important;
+  }
+  .hdr__progress,
+  .proof__wash,
+  .band__toggle {
+    display: none !important;
+  }
+  .marquee,
+  .marquee__track {
+    animation: none !important;
+    transform: none !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+  .marquee__track [aria-hidden="true"] {
+    display: none !important;
+  }
+}

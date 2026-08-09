@@ -1,0 +1,147 @@
+---
+interface Props {
+  clients: { title: string; items: string[] };
+  /** Both states of the motion toggle, from src/data/site.json. */
+  motion: { pause: string; resume: string };
+}
+const { clients, motion } = Astro.props;
+---
+
+{/*
+  A client list long enough that a static row would either wrap into a block or
+  be cut arbitrarily, so it drifts instead — one full pass takes about a minute,
+  which reads as scenery rather than as something demanding to be watched. It
+  pauses when the pointer is over it, so a name can actually be read.
+
+  The list is printed twice and the track travels exactly -50%, which is what
+  makes the loop seamless. The second copy is aria-hidden: a screen reader
+  should hear the client list once.
+
+  The button is the stop control WCAG 2.2.2 asks for. Pausing on hover is a
+  mouse-only gesture — no keyboard reaches it and a phone has no hover at all —
+  so this is the only pause that everyone can actually use. It ships with
+  `hidden` set and the script removes that, because without the script the
+  animation is still running and a dead button would be worse than none.
+*/}
+<section class="band" aria-labelledby="clients-title">
+  <div class="wrap band__head">
+    <span class="rule rule--sm reveal reveal--rule" aria-hidden="true"></span>
+    <p class="eyebrow" id="clients-title"><span class="reveal" style="--rd:0.06s">{clients.title}</span></p>
+    <button
+      class="band__toggle"
+      type="button"
+      hidden
+      data-motion-toggle
+      data-label-pause={motion.pause}
+      data-label-resume={motion.resume}>{motion.pause}</button>
+  </div>
+
+  <div class="marquee reveal" style="--rd:0.14s">
+    <ul class="marquee__track">
+      {clients.items.map((name) => <li>{name}</li>)}
+      {clients.items.map((name) => <li aria-hidden="true">{name}</li>)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .band {
+    padding-block: clamp(36px, 6vw, 64px);
+    border-bottom: 1px solid var(--line);
+    /* The track is wider than the viewport by design. This is the ancestor
+       that clips it, so the document never gains a horizontal scrollbar. */
+    overflow: hidden;
+  }
+  .band__head {
+    display: flex;
+    align-items: center;
+    /* Wraps at 320px rather than pushing the toggle past the gutter. */
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    margin-bottom: 26px;
+  }
+  .rule--sm {
+    width: 26px;
+    flex: none;
+  }
+  .band__head .eyebrow {
+    margin: 0;
+  }
+
+  .band__toggle {
+    margin-inline-start: auto;
+    display: inline-flex;
+    align-items: center;
+    font: inherit;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    /* --ink-2 on --paper is 7.8:1; the band is untinted. */
+    color: var(--ink-2);
+    background: transparent;
+    border: 1px solid var(--line-3);
+    border-radius: 999px;
+    padding: 5px 13px;
+    cursor: pointer;
+    transition: color 0.25s ease, border-color 0.25s ease;
+  }
+  .band__toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent-fill);
+  }
+  /* `hidden` has to beat the display above, or the no-JS fallback shows a
+     button that cannot do anything. */
+  .band__toggle[hidden] {
+    display: none;
+  }
+
+  .marquee {
+    overflow: hidden;
+    /* Names fade out at the edges instead of being sliced by the viewport. */
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  }
+  .marquee__track {
+    display: flex;
+    width: max-content;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    animation: atlas-marquee 68s linear infinite;
+  }
+  .marquee:hover .marquee__track,
+  .marquee:focus-within .marquee__track,
+  /* Astro scopes the last compound selector, so this ends up more specific
+     than the `animation` shorthand above and the pause actually sticks. */
+  html.motion-paused .marquee__track {
+    animation-play-state: paused;
+  }
+
+  .marquee__track li {
+    display: flex;
+    align-items: center;
+    gap: clamp(20px, 3.4vw, 40px);
+    padding-inline-end: clamp(20px, 3.4vw, 40px);
+    font-family: var(--font-display);
+    font-size: clamp(19px, 2.2vw, 26px);
+    line-height: 1.3;
+    white-space: nowrap;
+    color: var(--ink-2);
+    transition: color 0.3s ease;
+  }
+  .marquee__track li::after {
+    content: "";
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--line-2);
+    transition: background-color 0.3s ease;
+  }
+  .marquee__track li:hover {
+    color: var(--accent);
+  }
+  .marquee__track li:hover::after {
+    background: var(--accent-fill);
+  }
+</style>

@@ -1,0 +1,42 @@
+---
+// Splits a headline into words so it can rise a word at a time.
+//
+// The text still comes from src/data/site.json — this only changes how it is
+// marked up, so editing a headline stays a one-line edit to the data file and
+// the animation adapts to however many words the new one has.
+//
+// Whitespace is preserved as its own text node rather than collapsed into the
+// spans, so lines still break exactly where they would have.
+interface Props {
+  text: string;
+  /** Seconds before the first word moves. */
+  start?: number;
+  /** Seconds between one word and the next. */
+  step?: number;
+  /** Seconds the whole phrase may take, however many words it has. */
+  cap?: number;
+}
+const { text, start = 0, step = 0.05, cap = 0.6 } = Astro.props;
+
+const parts = text.split(/(\s+)/);
+const wordCount = parts.filter((p) => p.trim() !== "").length;
+// A long headline must not turn into a long wait, so the step shrinks to fit
+// the cap rather than the phrase running past it.
+const gap = wordCount > 1 ? Math.min(step, cap / (wordCount - 1)) : 0;
+
+let seen = -1;
+---
+
+{
+  parts.map((part) => {
+    if (part.trim() === "") return part;
+    seen += 1;
+    return (
+      <span class="w">
+        <span class="w__i reveal" style={`--rd:${(start + seen * gap).toFixed(3)}s`}>
+          {part}
+        </span>
+      </span>
+    );
+  })
+}
